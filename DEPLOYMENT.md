@@ -27,25 +27,44 @@ Cloudflare sits **in front** of a container host that actually runs the JAR. You
 
 ---
 
-## 2. Deploy the container (example: Render)
+## 2. Deploy the container (Render)
 
-1. **New → Web Service** → connect the GitHub repo. Render auto-detects the `Dockerfile`.
-2. **Add a PostgreSQL** instance (Render → New → PostgreSQL) and copy its **internal connection string**.
+### 2a. One-click Blueprint (recommended)
+
+The repo ships a [`render.yaml`](render.yaml) Blueprint that provisions **both** the web
+service (built from the `Dockerfile`) **and** a managed PostgreSQL, and wires them together.
+
+1. Render dashboard → **New → Blueprint** → connect this GitHub repo.
+2. Render reads `render.yaml` and shows the plan: a `blogify-api` web service + a `blogify-db`
+   Postgres. It auto-generates `JWT_SECRET` and pulls the DB host/port/name/user/password
+   into the app's environment for you.
+3. The only thing it prompts for is **`OPENAI_API_KEY`** (declared `sync:false` so it's never
+   in git). Paste your key, or leave it blank to deploy without AI features.
+4. Click **Apply**. Render builds the image and runs the health check at `/actuator/health`.
+   Note the public URL, e.g. `https://blogify-api.onrender.com`.
+
+> The app binds to Render's injected `PORT` automatically (`server.port=${PORT:...}`), and the
+> `prod` profile composes its JDBC URL from `DB_HOST`/`DB_PORT`/`DB_NAME` — no manual URL
+> conversion needed. Free tier: the service sleeps after ~15 min idle (cold start on next
+> request) and the free DB expires ~30 days after creation.
+
+### 2b. Manual (if you prefer to click through it)
+
+1. **New → Web Service** → connect the repo. Render auto-detects the `Dockerfile`.
+2. **New → PostgreSQL**; from its info page copy the **host**, **port**, **database**, **user**, **password**.
 3. Set environment variables on the web service:
 
    | Key | Value |
    |-----|-------|
    | `SPRING_PROFILES_ACTIVE` | `prod` |
-   | `DATABASE_URL` | `jdbc:postgresql://<host>:5432/<db>` |
+   | `DB_HOST` / `DB_PORT` / `DB_NAME` | from Render PG (or set `DATABASE_URL` directly as `jdbc:postgresql://host:port/db`) |
    | `DATABASE_USERNAME` | from Render PG |
    | `DATABASE_PASSWORD` | from Render PG |
    | `JWT_SECRET` | output of `openssl rand -base64 48` |
    | `CORS_ALLOWED_ORIGINS` | your frontend domain(s) |
    | `OPENAI_API_KEY` | optional |
 
-   > Render exposes the PG URL as `postgres://...`. Convert it to the JDBC form `jdbc:postgresql://HOST:PORT/DB` and put the username/password in their own variables.
-
-4. Render builds the image and runs the health check at `/actuator/health`. Note the public URL, e.g. `https://blog-api.onrender.com`.
+4. Render builds the image and runs the health check at `/actuator/health`. Note the public URL.
 
 > **Railway / Fly.io** follow the same shape: provision Postgres, set the same env vars, deploy the Dockerfile.
 
