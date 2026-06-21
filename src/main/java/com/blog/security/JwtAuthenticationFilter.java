@@ -1,0 +1,74 @@
+package com.blog.security;
+
+import java.io.IOException;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
+import org.springframework.stereotype.Component;
+import org.springframework.web.filter.OncePerRequestFilter;
+
+import io.jsonwebtoken.JwtException;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+
+/**
+ * Reads the {@code Authorization: Bearer <token>} header, validates the JWT and,
+ * if valid, populates the Spring Security context for the request.
+ */
+@Component
+public class JwtAuthenticationFilter extends OncePerRequestFilter {
+
+	private static final Logger log = LoggerFactory.getLogger(JwtAuthenticationFilter.class);
+	private static final String BEARER_PREFIX = "Bearer ";
+
+	private final UserDetailsService userDetailsService;
+	private final JwtTokenHelper jwtTokenHelper;
+
+	public JwtAuthenticationFilter(UserDetailsService userDetailsService, JwtTokenHelper jwtTokenHelper) {
+		this.userDetailsService = userDetailsService;
+		this.jwtTokenHelper = jwtTokenHelper;
+	}
+
+	@Override
+	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+			throws ServletException, IOException {
+
+		String token = resolveToken(request);
+
+		if (token != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+			try {
+				String username = jwtTokenHelper.getUsernameFromToken(token);
+				// Access-protected resources must be reached with an ACCESS token, never a refresh token.
+				if (JwtTokenHelper.TYPE_ACCESS.equals(jwtTokenHelper.getTokenType(token))) {
+					UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+					if (jwtTokenHelper.validateToken(token, userDetails)) {
+						UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+								userDetails, null, userDetails.getAuthorities());
+						authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+						SecurityContextHolder.getContext().setAuthentication(authentication);
+					}
+				}
+			} catch (JwtException | IllegalArgumentException ex) {
+				// Invalid / expired / malformed token: leave the context unauthenticated.
+				log.debug("Could not authenticate JWT: {}", ex.getMessage());
+			}
+		}
+
+		filterChain.doFilter(request, response);
+	}
+
+	private String resolveToken(HttpServletRequest request) {
+		String header = request.getHeader("Authorization");
+		if (header != null && header.startsWith(BEARER_PREFIX)) {
+			return header.substring(BEARER_PREFIX.length());
+		}
+		return null;
+	}
+}

@@ -1,0 +1,40 @@
+# Full local stack: PostgreSQL + the Spring Boot API.
+# Usage:  cp .env.example .env  &&  docker compose up --build
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: blog-db
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-blog_app}
+      POSTGRES_USER: ${POSTGRES_USER:-blog}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-blog}
+    ports:
+      - "5432:5432"
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-blog} -d ${POSTGRES_DB:-blog_app}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build: .
+    container_name: blog-api
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      DATABASE_URL: jdbc:postgresql://db:5432/${POSTGRES_DB:-blog_app}
+      DATABASE_USERNAME: ${POSTGRES_USER:-blog}
+      DATABASE_PASSWORD: ${POSTGRES_PASSWORD:-blog}
+      JWT_SECRET: ${JWT_SECRET:-5367566B59703373367639792F423F4528482B4D6251655468576D5A71347437}
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:3000}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      AI_MODEL: ${AI_MODEL:-gpt-4o-mini}
+    ports:
+      - "8080:8080"
+
+volumes:
+  db-data:

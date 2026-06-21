@@ -1,0 +1,94 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+@layer base {
+  html {
+    @apply scroll-smooth;
+  }
+
+  body {
+    @apply font-sans antialiased text-slate-800 dark:text-slate-100;
+    @apply bg-slate-50 dark:bg-[#070912];
+    min-height: 100vh;
+  }
+
+  h1, h2, h3, h4 {
+    @apply font-display tracking-tight;
+  }
+
+  ::selection {
+    @apply bg-aurora-violet/40 text-white;
+  }
+}
+
+@layer components {
+  /* Frosted glass surface — the signature of the Aurora theme */
+  .glass {
+    @apply rounded-2xl border backdrop-blur-xl;
+    @apply bg-white/70 border-slate-200/70 shadow-sm;
+    @apply dark:bg-white/[0.04] dark:border-white/10;
+  }
+
+  .glass-strong {
+    @apply rounded-2xl border backdrop-blur-2xl;
+    @apply bg-white/80 border-slate-200;
+    @apply dark:bg-white/[0.06] dark:border-white/15;
+  }
+
+  /* Neon gradient text */
+  .text-gradient {
+    @apply bg-gradient-to-r from-aurora-violet via-aurora-fuchsia to-aurora-cyan bg-clip-text text-transparent;
+  }
+
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition;
+    @apply focus:outline-none focus-visible:ring-2 focus-visible:ring-aurora-violet/60 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-primary {
+    @apply btn text-white shadow-glow;
+    background-image: linear-gradient(120deg, #8b5cf6, #d946ef 55%, #22d3ee);
+    background-size: 160% 160%;
+  }
+  .btn-primary:hover {
+    @apply shadow-glow-cyan;
+    background-position: 100% 50%;
+  }
+
+  .btn-ghost {
+    @apply btn border border-slate-200 bg-white/60 text-slate-700;
+    @apply dark:border-white/10 dark:bg-white/5 dark:text-slate-200 dark:hover:bg-white/10 hover:bg-white;
+  }
+
+  .input {
+    @apply w-full rounded-xl border px-4 py-2.5 text-sm transition;
+    @apply bg-white/80 border-slate-200 text-slate-800 placeholder:text-slate-400;
+    @apply dark:bg-white/[0.04] dark:border-white/10 dark:text-slate-100 dark:placeholder:text-slate-500;
+    @apply focus:outline-none focus:ring-2 focus:ring-aurora-violet/50 focus:border-transparent;
+  }
+
+  .chip {
+    @apply inline-flex items-center rounded-full px-3 py-1 text-xs font-medium;
+    @apply bg-aurora-violet/10 text-aurora-violet dark:bg-aurora-violet/15 dark:text-fuchsia-200;
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #8b5cf6, #22d3ee);
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
