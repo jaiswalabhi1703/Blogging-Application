@@ -35,15 +35,39 @@ npm run build               # outputs to dist/
 npm run preview             # preview the production build
 ```
 
-## Deploy to Cloudflare Pages
+## Deploy to Cloudflare
 
-1. Push the repo to GitHub.
-2. Cloudflare dashboard → **Workers & Pages → Create → Pages → Connect to Git**.
-3. Build settings:
-   - **Root directory:** `frontend`
-   - **Build command:** `npm run build`
-   - **Build output directory:** `dist`
-4. Environment variable: `VITE_API_BASE_URL = https://api.yourdomain.com` (your deployed backend, behind Cloudflare).
-5. Deploy. `public/_redirects` already handles SPA routing.
+> ⚠️ **You must serve the Vite *build* (`dist/`), not the source folder.** If Cloudflare
+> serves the source, the page is blank because `index.html` points at `/src/main.jsx`
+> (dev-only). `wrangler.jsonc` already points the deployment at `./dist`.
+
+### Option A — Cloudflare Workers (Git-connected, `*.workers.dev`)
+
+Cloudflare dashboard → **Workers & Pages → your `blogify` Worker → Settings → Build**:
+- **Root directory:** `frontend`
+- **Build command:** `npm run build`
+- **Deploy command:** `npx wrangler deploy`  (uses `wrangler.jsonc`)
+
+`wrangler.jsonc` serves `./dist` and handles SPA routing (`not_found_handling: single-page-application`). Trigger a new deployment after setting this.
+
+### Option B — CLI
+
+```bash
+cd frontend
+npm install
+npx wrangler login      # once
+npm run deploy          # builds, then wrangler deploy
+```
+
+### Option C — Cloudflare Pages (`*.pages.dev`)
+
+Create → Pages → Connect to Git → Root `frontend`, Build `npm run build`, Output `dist`. `public/_redirects` handles SPA routing.
+
+### API base URL (important)
+
+`VITE_API_BASE_URL` is baked in **at build time**. The local `.env` is git-ignored, so
+the Cloudflare build defaults to `http://localhost:8080`. Once the backend is deployed,
+set **`VITE_API_BASE_URL = https://your-api-host`** as a build environment variable in
+Cloudflare and redeploy — otherwise the app loads but shows no data.
 
 This is the clean split: **static frontend on Cloudflare's edge, JVM API on a container host behind Cloudflare** (see [../DEPLOYMENT.md](../DEPLOYMENT.md)).

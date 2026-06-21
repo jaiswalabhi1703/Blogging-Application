@@ -1,0 +1,13 @@
+{
+  // Cloudflare Workers static-assets config for the Blogify SPA.
+  // Serves the Vite production BUILD (./dist), not the source.
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "blogify",
+  "compatibility_date": "2024-11-01",
+  "assets": {
+    // The built output. CF must run `npm run build` first (see package.json "deploy"/"build").
+    "directory": "./dist",
+    // Serve index.html for client-side routes (React Router) instead of 404.
+    "not_found_handling": "single-page-application"
+  }
+}
