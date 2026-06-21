@@ -69,6 +69,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 		if (header != null && header.startsWith(BEARER_PREFIX)) {
 			return header.substring(BEARER_PREFIX.length());
 		}
+		// Fallback for Server-Sent Events: browsers' EventSource cannot set the
+		// Authorization header, so the SSE stream passes the token as a query param.
+		String paramToken = request.getParameter("access_token");
+		if (paramToken != null && !paramToken.isBlank()) {
+			return paramToken;
+		}
 		return null;
 	}
 }

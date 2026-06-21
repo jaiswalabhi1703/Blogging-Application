@@ -3,6 +3,7 @@ import { Link, NavLink, useNavigate } from "react-router-dom";
 import { Sparkles, PenSquare, LogOut, User as UserIcon, Menu, X } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import ThemeToggle from "./ThemeToggle";
+import NotificationBell from "./NotificationBell";
 
 const navItem = ({ isActive }) =>
   `px-3 py-2 rounded-lg text-sm font-medium transition ${
@@ -49,6 +50,7 @@ export default function Navbar() {
           <ThemeToggle />
           {user ? (
             <>
+              <NotificationBell />
               <Link to="/write" className="btn-primary">
                 <PenSquare size={16} /> New post
               </Link>

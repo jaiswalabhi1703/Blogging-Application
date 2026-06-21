@@ -7,6 +7,8 @@ import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -14,6 +16,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.blog.config.CacheConfig;
 import com.blog.entities.Category;
 import com.blog.entities.Post;
 import com.blog.entities.User;
@@ -67,6 +70,7 @@ public class PostServiceImpl implements PostService {
 
 	@Override
 	@Transactional
+	@CacheEvict(value = CacheConfig.POSTS_CACHE, key = "#postId")
 	public PostDto updatePost(PostDto postDto, Integer postId) {
 		// 1st find the post 
 		Post post = this.postRepo.findById(postId)
@@ -80,6 +84,7 @@ public class PostServiceImpl implements PostService {
 
 	@Override
 	@Transactional
+	@CacheEvict(value = CacheConfig.POSTS_CACHE, key = "#postId")
 	public void deletePost(Integer postId) {
 		// 1st find the post 
 		Post post = this.postRepo.findById(postId)
@@ -123,6 +128,7 @@ public class PostServiceImpl implements PostService {
 	}
 
 	@Override
+	@Cacheable(value = CacheConfig.POSTS_CACHE, key = "#postId")
 	public PostDto getPostById(Integer postId) {
 		Post post = this.postRepo.findById(postId)
 				.orElseThrow(()-> new ResourceNotFoundException("Post", "postId",postId));
@@ -162,6 +168,7 @@ public class PostServiceImpl implements PostService {
 
 	@Override
 	@Transactional
+	@CacheEvict(value = CacheConfig.POSTS_CACHE, key = "#postId")
 	public PostDto summarizePost(Integer postId) {
 		Post post = this.postRepo.findById(postId)
 				.orElseThrow(() -> new ResourceNotFoundException("Post", "postId", postId));

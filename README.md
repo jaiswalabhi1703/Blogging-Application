@@ -17,6 +17,9 @@ A production-grade blog: a **Spring Boot 3.3 / Java 17** REST API plus a **React
 
 - **Authentication & authorization** — register/login, BCrypt password hashing, stateless JWT **access tokens** (15 min) + DB-backed **refresh tokens** (7 days) with **rotation & revocation**, and `@PreAuthorize` role checks (`ROLE_ADMIN` / `ROLE_USER`).
 - **Blog domain** — users, posts, categories, comments; pagination, sorting, keyword search, and image upload/download.
+- **Event-driven notifications** 🔔 — commenting on a post publishes an event to **Apache Kafka**; a consumer persists the notification off the API response path. Falls back to synchronous handling when Kafka is disabled (local dev).
+- **Real-time delivery** ⚡ — notifications are pushed to the browser over **Server-Sent Events** (live bell + unread badge in the UI).
+- **Redis cache-aside** — hot posts are cached via Spring Cache backed by **Redis** (in-memory fallback when Redis is disabled), cutting repeat DB reads.
 - **AI authoring assistant** 🤖 — `POST /api/posts/{id}/ai/summarize` calls **OpenAI** (`gpt-4o-mini`) to generate a concise summary and topic tags, then persists them. Degrades gracefully when no API key is set.
 - **API docs** — interactive Swagger UI with a JWT "Authorize" button.
 - **Operability** — Spring Boot Actuator health endpoint, structured logging, container health checks.
@@ -32,6 +35,9 @@ A production-grade blog: a **Spring Boot 3.3 / Java 17** REST API plus a **React
 | Language / runtime | Java 17, Spring Boot 3.3.5 |
 | Security | Spring Security 6, jjwt 0.12.x |
 | Persistence | Spring Data JPA / Hibernate; H2 (dev/test), PostgreSQL (prod) |
+| Messaging | Apache Kafka (spring-kafka) — event-driven notifications |
+| Caching | Redis (Spring Cache, cache-aside) with in-memory fallback |
+| Real-time | Server-Sent Events (SSE) |
 | Mapping / validation | ModelMapper, Jakarta Bean Validation |
 | Docs | springdoc-openapi (Swagger UI) |
 | AI | OpenAI Chat Completions API (plain HTTP via Spring `RestClient`) |

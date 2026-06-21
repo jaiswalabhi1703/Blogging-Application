@@ -19,6 +19,9 @@ public class AppProperties {
 	private final Jwt jwt = new Jwt();
 	private final Cors cors = new Cors();
 	private final Ai ai = new Ai();
+	private final Kafka kafka = new Kafka();
+	private final Redis redis = new Redis();
+	private final Cache cache = new Cache();
 
 	@Getter
 	@Setter
@@ -49,5 +52,28 @@ public class AppProperties {
 		private String apiKey = "";
 		/** OpenAI-compatible API base URL. */
 		private String baseUrl = "https://api.openai.com/v1";
+	}
+
+	@Getter
+	@Setter
+	public static class Kafka {
+		/** When true, notifications are published to Kafka; otherwise produced synchronously. */
+		private boolean enabled = false;
+		/** Topic that carries notification events. */
+		private String notificationsTopic = "blog.notifications";
+	}
+
+	@Getter
+	@Setter
+	public static class Redis {
+		/** When true, the cache-aside layer is backed by Redis; otherwise an in-memory cache. */
+		private boolean enabled = false;
+	}
+
+	@Getter
+	@Setter
+	public static class Cache {
+		/** TTL (seconds) for cached posts. */
+		private long postTtlSeconds = 600;
 	}
 }

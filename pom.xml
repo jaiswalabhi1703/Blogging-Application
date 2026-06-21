@@ -45,6 +45,18 @@
 			<artifactId>spring-boot-starter-security</artifactId>
 		</dependency>
 
+		<!-- Redis cache-aside layer for hot posts -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-redis</artifactId>
+		</dependency>
+
+		<!-- Apache Kafka for event-driven async notifications -->
+		<dependency>
+			<groupId>org.springframework.kafka</groupId>
+			<artifactId>spring-kafka</artifactId>
+		</dependency>
+
 		<!-- Operational endpoints: health, info, metrics (used by Docker/CI health checks) -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>

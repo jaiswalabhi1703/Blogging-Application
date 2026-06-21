@@ -119,4 +119,13 @@ export const AiApi = {
   status: () => api.get("/api/ai/status").then((r) => r.data),
 };
 
+export const NotificationApi = {
+  list: () => api.get("/api/notifications").then((r) => r.data),
+  unreadCount: () => api.get("/api/notifications/unread-count").then((r) => r.data.count),
+  markRead: (id) => api.put(`/api/notifications/${id}/read`).then((r) => r.data),
+  // EventSource can't set headers, so the token rides as a query param
+  streamUrl: () =>
+    `${BASE_URL}/api/notifications/stream?access_token=${encodeURIComponent(tokenStore.access || "")}`,
+};
+
 export { BASE_URL };
